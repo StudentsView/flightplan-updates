@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Qkfvs5skfK0oeCvaX6o3PfDcsPCK3HVS6nkcPIS8FOg='; style-src 'sha256-lwQXv+bxCk7BtgGzPp+XDjSDMgUIl5lEr8y2dunFOH4='; base-uri 'none'; form-action 'none'">
+  <title>Flight Plan · 이메일 인증</title>
+  <style>
+    :root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color:#172739;background:#edf2f7}
+    body{min-height:100svh;margin:0;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+    main{max-width:420px;width:100%;box-sizing:border-box;padding:36px 28px;background:#fff;border-top:5px solid #206bcc;border-radius:16px;box-shadow:0 12px 42px #1727390d}
+    .brand{font-size:13px;letter-spacing:.16em;font-weight:700;color:#206bcc;margin:0 0 28px}
+    h1{font-size:28px;line-height:1.4;letter-spacing:-.05em;margin:0 0 16px;word-break:keep-all}
+    p{font-size:15px;line-height:1.75;color:#526478;word-break:keep-all}
+    a{display:block;padding:17px 16px;margin-top:28px;border-radius:10px;text-align:center;background:#206bcc;color:white;font-weight:700;text-decoration:none}
+    .help{font-size:13px;margin:18px 0 0}
+    a:focus-visible{outline:3px solid #172739;outline-offset:4px}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">FLIGHT PLAN</p>
+    <h1 id="heading">앱으로 돌아가 로그인하세요</h1>
+    <p id="message">이메일 인증을 완료했다면 앱에서 가입한 이메일과 비밀번호로 로그인할 수 있습니다.</p>
+    <a id="open-app" href="flightplan://auth/callback" rel="noreferrer">Flight Plan 열기</a>
+    <p class="help">버튼을 눌러도 앱이 열리지 않으면 Flight Plan을 직접 열어 로그인하세요. 인증 메일의 링크를 다시 누를 필요는 없습니다.</p>
+    <noscript><p>이미 인증했다면 앱으로 돌아가 로그인하세요.</p></noscript>
+  </main>
+  <script>
+    (() => {
+      const original = new URL(window.location.href);
+      // Retain only Supabase auth fields in memory. Never forward a user-supplied destination.
+      const callback = new URL("flightplan://auth/callback");
+      const query = new URLSearchParams();
+      for (const key of ["code", "error", "error_description", "type"]) {
+        const value = original.searchParams.get(key);
+        if (value !== null && value.length <= 16384) query.set(key, value);
+      }
+      callback.search = query.toString();
+      const fragment = new URLSearchParams(original.hash.slice(1));
+      const forwarded = new URLSearchParams();
+      for (const key of ["access_token", "refresh_token", "token_type", "expires_in", "expires_at", "type", "code", "error", "error_code", "error_description"]) {
+        const value = fragment.get(key);
+        if (value !== null && value.length <= 16384) forwarded.set(key, value);
+      }
+      callback.hash = forwarded.toString();
+      // Remove credentials from the visible URL and history before any user interaction.
+      window.history.replaceState(null, "", original.pathname);
+      document.getElementById("open-app").href = callback.href;
+      const failed = query.has("error") || forwarded.has("error") || forwarded.has("error_code");
+      const hasAuth = query.has("code") || forwarded.has("code")
+        || (forwarded.has("access_token") && forwarded.has("refresh_token"));
+      if (failed) {
+        document.getElementById("heading").textContent = "인증 링크를 확인해 주세요";
+        document.getElementById("message").textContent = "링크가 만료되었거나 이미 사용되었습니다. 이미 인증했다면 앱에서 로그인하세요. 아직 인증하지 않았다면 앱에서 인증 메일을 다시 요청해 주세요.";
+      } else if (hasAuth) {
+        document.getElementById("heading").textContent = "앱에서 인증을 마무리하세요";
+        document.getElementById("message").textContent = "아래 버튼을 눌러 Flight Plan으로 돌아가세요. 앱이 열리지 않으면 직접 앱으로 돌아가 가입한 이메일과 비밀번호로 로그인하세요.";
+      }
+    })();
+  </script>
+</body>
+</html>
