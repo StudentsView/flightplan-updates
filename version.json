@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "minimumVersion": "0.1.4",
+  "minimumVersion": "0.1.6",
   "minimumBuild": 1,
-  "latestVersion": "0.1.4",
+  "latestVersion": "0.1.6",
   "updateURL": "https://asnd.fromise.com",
-  "message": "10/12 APNs 업데이트 완료!"
+  "message": "운수권 관련 강제 업데이트"
 }
