@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "minimumVersion": "0.2.5",
+  "minimumVersion": "0.2.6",
   "minimumBuild": 1,
-  "latestVersion": "0.2.5",
+  "latestVersion": "0.2.6",
   "updateURL": "https://asnd.fromise.com",
   "message": "업데이트가 있습니다."
 }
